@@ -20,6 +20,7 @@ namespace StudentMVC.Models
         public Nullable<int> Phone { get; set; }
         public int Dept_id { get; set; }
         public int Course_id { get; set; }
+        public string Password { get; set; }
     
         public virtual Course Course { get; set; }
         public virtual Dept Dept { get; set; }

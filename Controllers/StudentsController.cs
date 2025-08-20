@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StudentMVC.Models;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using StudentMVC.Models;
+using System.Web.Security;
 
 namespace StudentMVC.Controllers
 {
@@ -49,7 +50,7 @@ namespace StudentMVC.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Name,Email,Phone,Dept_id,Course_id")] Student student)
+        public ActionResult Create([Bind(Include = "Id,Name,Email,Phone,Dept_id,Course_id,Password")] Student student)
         {
             if (ModelState.IsValid)
             {
@@ -85,7 +86,7 @@ namespace StudentMVC.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Name,Email,Phone,Dept_id,Course_id")] Student student)
+        public ActionResult Edit([Bind(Include = "Id,Name,Email,Phone,Dept_id,Course_id,Password")] Student student)
         {
             if (ModelState.IsValid)
             {
@@ -132,18 +133,12 @@ namespace StudentMVC.Controllers
             }
             base.Dispose(disposing);
         }
-        /* public ActionResult Search(int? dept,int? course)
-         {
-             var student = db.Students.Include(s => s.Course).Include(s => s.Dept);
 
-
-         }*/
-        //db.Students.Include(s => s.Course).Include(s => s.Dept);
-
+        
         public ActionResult Search(int? dept, int? course)
         {
             var students = db.Students.Include(s => s.Course).Include(s => s.Dept).AsQueryable();
-            
+
             if (dept.HasValue)
             {
                 students = students.Where(s => s.Dept_id == dept.Value);
@@ -157,12 +152,83 @@ namespace StudentMVC.Controllers
             // Adjusted to match your actual table column names: Id and Dept_name, Course_name
             ViewBag.DeptId = new SelectList(db.Depts, "Id", "Dept_name");
             ViewBag.CourseId = new SelectList(db.Courses, "Id", "Course_name");
-           
+
             return View(students.ToList());
         }
+        /*
+        [HttpGet]
+        public ActionResult Login()
+        {
+            return View();
+        }
 
-      
+        [HttpPost]
+        public ActionResult Login(LoginModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = db.Tbl_Student
+                             .FirstOrDefault(u => u.Email == model.Email
+                                               && u.Password == model.Password);
+
+                if (user != null)
+                {
+                    FormsAuthentication.SetAuthCookie(user.Email, false);
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Invalid Email or password");
+                    return RedirectToAction("Login");
+                }
+            }
+            return View(model);
+        }
+
+        public ActionResult Logout()
+        {
+            FormsAuthentication.SignOut();
+            return RedirectToAction("Login", "Index");
+        }
+        */
+
+        // LOGIN - GET
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult Login()
+        {
+            return View();
+        }
+
+        // LOGIN - POST
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public ActionResult Login(LoginModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var student = db.Students.FirstOrDefault(u => u.Email == model.Email && u.Password == model.Password);
+
+            if (student != null)
+            {
+                FormsAuthentication.SetAuthCookie(student.Email, false);
+                return RedirectToAction("Index");
+            }
+
+            ModelState.AddModelError("", "Invalid email or password");
+            return View(model);
+        }
+
+        // LOGOUT
+        [Authorize]
+        public ActionResult Logout()
+        {
+            FormsAuthentication.SignOut();
+            return RedirectToAction("Login");
+        }
     }
-
-    
 }

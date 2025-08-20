@@ -250,7 +250,6 @@
     <Content Include="Views\Courses\Edit.cshtml" />
     <Content Include="Views\Courses\Index.cshtml" />
     <Content Include="Views\Students\Search.cshtml" />
-    <Content Include="Views\Students\CourseWise.cshtml" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
